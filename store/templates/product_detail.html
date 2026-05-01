@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<ul>
+    <li>
+        {{ product.name }}
+        {{ product.price }}
+        {{ product.description }}
+        {{ product.created_at }}
+    </li>
+</ul>
+{% endblock %}
