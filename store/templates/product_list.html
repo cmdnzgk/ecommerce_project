@@ -19,6 +19,7 @@
                 <a href="{% url 'product_detail' product.id %}">
                     {{ product.name }}
                 </a>
+                <a href="{% url 'add_to_cart' product.id %}">Sepete Ekle</a>
             </li>
         {% endfor %}
     </ul>
