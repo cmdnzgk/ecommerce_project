@@ -1,4 +1,8 @@
-<nav>
-    <a href="{% url 'product_list' %}">Ürünler</a>
-    <a href="{% url 'cart' %}">Sepet</a>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'product_list' %}">Ürünler</a>
+        <div>
+            <a class="btn btn-outline-light" href="{% url 'cart' %}">Sepet</a>
+        </div>
+    </div>
 </nav>
