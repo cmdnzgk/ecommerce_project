@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <h1>Kayıt Ol</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="container mt-2">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+        </div>
+        <div class="container mt-2">
+            {{ form.password1.label_tag }}
+            {{ form.password1 }}
+        </div>
+        <div class="container mt-2">
+            {{ form.password2.label_tag }}
+            {{ form.password2 }}
+        </div>
+        <button class="btn btn-success mt-2" type="submit">Kayıt Ol</button>
+    </form>
+</div>
+
+{% endblock %}

@@ -1,6 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Product, Category, Cart, CartItem
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, authenticate
+from .forms import RegisterForm
+from django.contrib import messages
+
 
 def product_list(request):
     category_id = request.GET.get("category")
@@ -73,3 +77,32 @@ def remove_from_cart(request, item_id):
     item.delete()
 
     return redirect("cart")
+
+def register(request):
+    form = RegisterForm(request.POST or None)
+
+    if form.is_valid():
+        user = form.save()
+        login(request, user)
+
+        return redirect("product_list")
+    
+    return render(request, "register.html", {"form": form})
+
+def user_login(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username = username, password = password)
+
+        if user is not None:
+            login(request, user)
+            messages.success(request, f"Hoşgeldiniz, {user}.")
+
+            return redirect("product_list")
+
+        else:
+            messages.error(request, "Kullanıcı adı veya Şifre hatalı.")
+    
+    return render(request, "login.html")
