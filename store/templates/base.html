@@ -8,9 +8,19 @@
     {% include 'navbar.html' %}
     {% if messages %}
         {% for message in messages %}
-            <div class="container mt-3">
-                <span class="text-bg-success p-2">{{ message }}</span>
-            </div>
+            {% if message.tags == "success" %}
+                <div class="container mt-3">
+                    <span class="text-bg-success p-2">{{ message }}</span>
+                </div>
+            {% elif message.tags == "warning" %}
+                <div class="container mt-3">
+                    <span class="text-bg-warning p-2">{{ message }}</span>
+                </div>
+            {% else %}
+                <div class="container mt-3">
+                    <span class="text-bg-danger p-2">{{ message }}</span>
+                </div>
+            {% endif %}
         {% endfor %}
     {% endif %}
 <div class="container mt-4">

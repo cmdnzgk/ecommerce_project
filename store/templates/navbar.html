@@ -2,19 +2,14 @@
     <div class="container">
         <a class="navbar-brand" href="{% url 'product_list' %}">Store</a>
         <div class="d-flex align-items-center gap-2">
-            <a class="btn btn-outline-light" href="{% url 'cart' %}">Sepet</a>
-            <a class="btn btn-primary" href="{% url 'register' %}">Kayıt Ol</a>
-            <a class="btn btn-success" href="{% url 'login' %}">Giriş</a>
+            {% if user.is_authenticated %}
+                <span class="text-light">{{ user.username }}</span>
+                <a class="btn btn-warning" href="{% url 'cart' %}">Sepet</a>
+                <a class="btn btn-danger" href="{% url 'logout' %}">Çıkış</a>
+            {% else %}
+                <a class="btn btn-primary" href="{% url 'register' %}">Kayıt Ol</a>
+                <a class="btn btn-success" href="{% url 'login' %}">Giriş</a>
+            {% endif %}
         </div>
     </div>
 </nav>
-
-{% comment %}
-{% if user.is_authanticated %}
-    <span class="text-light">{{ user.username }}</span>
-    <a class="btn btn-danger" href="{% url 'logout' %}">Çıkış</a>
-{% else %}
-    
-    <a class="btn btn-primary" href="{% url 'register' %}">Kayıt Ol</a>
-{% endif %}
-{% endcomment %}

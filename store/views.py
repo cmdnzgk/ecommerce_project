@@ -1,10 +1,23 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Product, Category, Cart, CartItem
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from .forms import RegisterForm
 from django.contrib import messages
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from .serializers import ProductSerializer
 
+@api_view(["GET"])
+def product_api(request):
+    products = Product.objects.all()
+
+    serializer = ProductSerializer(products, many = True)
+
+    return Response(serializer.data)
+
+def api_test_page(request):
+    return render(request, "api_test.html")
 
 def product_list(request):
     category_id = request.GET.get("category")
@@ -53,7 +66,7 @@ def cart_view(request):
 
 login_required
 def increase_quantity(request, item_id):
-    item = CartItem.objects.get(id = item_id)
+    item = get_object_or_404(CartItem, id = item_id, cart__user = request.user)
     item.quantity += 1
     item.save()
 
@@ -61,7 +74,7 @@ def increase_quantity(request, item_id):
 
 login_required
 def decrease_quantity(request, item_id):
-    item = CartItem.objects.get(id = item_id)
+    item = get_object_or_404(CartItem, id = item_id, cart__user = request.user)
 
     if item.quantity > 1:
         item.quantity -= 1
@@ -73,7 +86,7 @@ def decrease_quantity(request, item_id):
 
 login_required
 def remove_from_cart(request, item_id):
-    item = CartItem.objects.get(id = item_id)
+    item = get_object_or_404(CartItem, id = item_id, cart__user = request.user)
     item.delete()
 
     return redirect("cart")
@@ -106,3 +119,9 @@ def user_login(request):
             messages.error(request, "Kullanıcı adı veya Şifre hatalı.")
     
     return render(request, "login.html")
+
+def user_logout(request):
+    logout(request)
+    messages.warning(request, "Çıkış Yapıldı.")
+    
+    return redirect("product_list")

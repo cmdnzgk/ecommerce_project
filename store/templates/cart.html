@@ -9,9 +9,9 @@
         {% for item in cart_items %}
             <li>
                 <p><strong>Ürün Adı: </strong>{{ item.product.name }}</p>
-                <a href="{% url 'increase_quantity' item.id %}">+</a>
-                <a href="{% url 'decrease_quantity' item.id %}">-</a>
-                <a href="{% url 'remove_from_cart' item.id %}">Sil</a>
+                <a class="btn btn-success" href="{% url 'increase_quantity' item.id %}">+</a>
+                <a class="btn btn-warning" href="{% url 'decrease_quantity' item.id %}">-</a>
+                <a class="btn btn-danger" href="{% url 'remove_from_cart' item.id %}">Sil</a>
                 <p><strong>Ürün Miktarı: </strong>{{ item.quantity }}</p>
                 <p><strong>Ürün Fiyatı: </strong>{{ item.product.price }} TL</p>
             </li>
