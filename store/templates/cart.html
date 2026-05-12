@@ -12,13 +12,13 @@
                 <a class="btn btn-success" href="{% url 'increase_quantity' item.id %}">+</a>
                 <a class="btn btn-warning" href="{% url 'decrease_quantity' item.id %}">-</a>
                 <a class="btn btn-danger" href="{% url 'remove_from_cart' item.id %}">Sil</a>
-                <p><strong>Ürün Miktarı: </strong>{{ item.quantity }}</p>
+                <p><strong>Ürün Miktarı: </strong>{{ item.quantity }} Tane</p>
                 <p><strong>Ürün Fiyatı: </strong>{{ item.product.price }} TL</p>
             </li>
         {% endfor %}
     </ul>
 
-    <h3><strong>Toplam Fiyat: </strong>{{ total_price }}</h3>
+    <h3><strong>Toplam Fiyat: </strong>{{ total_price }} TL</h3>
 
 {% else %}
     <p>Sepetiniz Boş.</p>

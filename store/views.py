@@ -38,7 +38,7 @@ def product_detail(request, id):
 
     return render(request, "product_detail.html", {"product": product})
 
-login_required
+@login_required
 def add_to_cart(request, product_id):
     product = Product.objects.get(id = product_id)
 
@@ -52,7 +52,7 @@ def add_to_cart(request, product_id):
 
     return redirect("product_list")
 
-login_required
+@login_required
 def cart_view(request):
     cart, created = Cart.objects.get_or_create(user = request.user)
     cart_items = CartItem.objects.filter(cart = cart)
@@ -64,7 +64,7 @@ def cart_view(request):
         "total_price": total_price
     })
 
-login_required
+@login_required
 def increase_quantity(request, item_id):
     item = get_object_or_404(CartItem, id = item_id, cart__user = request.user)
     item.quantity += 1
@@ -72,7 +72,7 @@ def increase_quantity(request, item_id):
 
     return redirect("cart")
 
-login_required
+@login_required
 def decrease_quantity(request, item_id):
     item = get_object_or_404(CartItem, id = item_id, cart__user = request.user)
 
@@ -84,7 +84,7 @@ def decrease_quantity(request, item_id):
     
     return redirect("cart")
 
-login_required
+@login_required
 def remove_from_cart(request, item_id):
     item = get_object_or_404(CartItem, id = item_id, cart__user = request.user)
     item.delete()

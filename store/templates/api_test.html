@@ -2,6 +2,29 @@
 
 {% block content %}
 
+<form id="my-form">
+    <input type="text" id="name-input">
+
+    <button type="submit">Gönder</button>
+</form>
+
+<h1 id="result"></h1>
+
+<script>
+    const form = document.getElementById("my-form")
+    const input = document.getElementById("name-input")
+    const result = document.getElementById("result")
+
+    form.addEventListener("submit", (event) => {
+        event.preventDefault()
+        result.innerHTML = "Merhaba" + " " + input.value
+    })
+</script>
+
+{% endblock %}
+
+{% comment %}
+
 <h1>API Test</h1>
 
 <div id="product-container"></div>
@@ -22,10 +45,33 @@
         })
 </script>
 
-{% endblock %}
+<h1 id="title">Merhaba</h1>
 
-{% comment %}
+<button id="btn">Değiştir</button>
 
+<script>
+    const button = document.getElementById("btn")
+    const title = document.getElementById("title")
 
+    button.addEventListener("click", () => {
+        title.innerHTML = "Selam"
+    })
+</script>
+
+<h1 id="title">Merhaba</h1>
+
+<input type="text" id="name-input">
+
+<button id="btn">Değiştir</button>
+
+<script>
+    const button = document.getElementById("btn")
+    const title = document.getElementById("title")
+    const input = document.getElementById("name-input")
+
+    button.addEventListener("click", () => {
+        title.innerHTML = "Merhaba" + " " + input.value
+    })
+</script>
 
 {% endcomment %}
