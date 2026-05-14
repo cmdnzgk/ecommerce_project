@@ -2,23 +2,39 @@
 
 {% block content %}
 
-<form id="my-form">
-    <input type="text" id="name-input">
+<input type="text" id="product-input">
 
-    <button type="submit">Gönder</button>
-</form>
+<button id="add-btn">Ekle</button>
 
-<h1 id="result"></h1>
+<div id="container"></div>
 
 <script>
-    const form = document.getElementById("my-form")
-    const input = document.getElementById("name-input")
-    const result = document.getElementById("result")
+    const input = document.getElementById("product-input")
+    const button = document.getElementById("add-btn")
+    const container = document.getElementById("container")
+    const products = []
 
-    form.addEventListener("submit", (event) => {
-        event.preventDefault()
-        result.innerHTML = "Merhaba" + " " + input.value
+    button.addEventListener("click", () => {
+        products.push(input.value)
+        renderProducts()
     })
+
+    function renderProducts() {
+        container.innerHTML = ""
+        products.forEach((product, index) => {
+            container.innerHTML += `
+            <div>
+                <h2>${product}</h2>
+                <button onclick="deleteProduct(${index})">Sil</button>
+            </div>
+            `
+        })
+    }
+
+    function deleteProduct(index) {
+        products.splice(index, 1)
+        renderProducts()
+    }
 </script>
 
 {% endblock %}
@@ -71,6 +87,131 @@
 
     button.addEventListener("click", () => {
         title.innerHTML = "Merhaba" + " " + input.value
+    })
+</script>
+
+<form id="my-form">
+    <input type="text" id="name-input">
+
+    <button type="submit">Gönder</button>
+</form>
+
+<h1 id="result"></h1>
+
+<script>
+    const form = document.getElementById("my-form")
+    const input = document.getElementById("name-input")
+    const result = document.getElementById("result")
+
+    form.addEventListener("submit", (event) => {
+        event.preventDefault()
+        result.innerHTML = "Merhaba" + " " + input.value
+    })
+</script>
+
+<h1 id="count">0</h1>
+
+<button id="increase-btn">Arttır</button>
+<button id="decrease-btn">Azalt</button>
+
+<script>
+    const countText = document.getElementById("count")
+    const button1 = document.getElementById("increase-btn")
+    const button2 = document.getElementById("decrease-btn")
+
+    let count = 0
+
+    button1.addEventListener("click", () => {
+        count += 1
+        countText.innerHTML = count
+    })
+
+    button2.addEventListener("click", () => {
+        count -= 1
+        countText.innerHTML = count
+    })
+</script>
+
+<button id="toggle-btn">Göster/Gizle</button>
+
+<div id="box">Merhaba</div>
+
+<script>
+    const button = document.getElementById("toggle-btn")
+    const box = document.getElementById("box")
+
+    button.addEventListener("click", () => {
+        if (box.style.display == "none") {
+            box.style.display = "block"
+        } else {
+            box.style.display = "none"
+        }
+    })
+</script>
+
+<div id="container"></div>
+
+<script>
+    const products = [
+        "Telefon",
+        "Laptop",
+        "Kulaklık"
+    ]
+    const container = document.getElementById("container")
+
+    products.forEach((product) => {
+        container.innerHTML += `
+            <h3>${product}</h3>
+        `
+    })
+</script>
+
+<div id="container"></div>
+
+<script>
+    const products = [
+        {
+            name: "Telefon",
+            price: 5000
+        },
+        {
+            name: "Laptop",
+            price: 10000
+        }
+    ]
+
+    const container = document.getElementById("container")
+
+    products.forEach((product) => {
+        container.innerHTML += `
+        <div>
+            <h2>${product.name}</h2>
+            <p>${product.price}</p>
+        </div>
+        `
+    })
+</script>
+
+<input type="text" id="product-input">
+
+<button id="add-btn">Ekle</button>
+
+<div id="container"></div>
+
+<script>
+    const input = document.getElementById("product-input")
+    const button = document.getElementById("add-btn")
+    const container = document.getElementById("container")
+    const products = []
+
+    button.addEventListener("click", () => {
+        products.push(input.value)
+        container.innerHTML = ""
+        products.forEach((product) => {
+            container.innerHTML += `
+            <h2>${product}</h2>
+            `
+        })
     })
 </script>
 
