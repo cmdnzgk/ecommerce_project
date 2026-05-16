@@ -3,38 +3,96 @@
 {% block content %}
 
 <input type="text" id="product-input">
+<input type="text" id="price-input">
+
+<input type="text" id="search-input">
 
 <button id="add-btn">Ekle</button>
+
+<button id="sort-btn">Fiyata Göre Sırala</button>
 
 <div id="container"></div>
 
 <script>
     const input = document.getElementById("product-input")
+    const input2 = document.getElementById("price-input")
+    const searchInput = document.getElementById("search-input")
     const button = document.getElementById("add-btn")
+    const sortButton = document.getElementById("sort-btn")
     const container = document.getElementById("container")
     const products = []
 
-    button.addEventListener("click", () => {
-        products.push(input.value)
+    sortButton.addEventListener("click", function() {
+        products.sort(function(a, b) {
+            return a.price - b.price
+        })
         renderProducts()
+    })
+
+    searchInput.addEventListener("input", function() {
+        renderProducts()
+    })
+
+    button.addEventListener("click", () => {
+        if (input.value && input2.value !== "") {
+            products.push({
+                name: input.value,
+                price: input2.value,
+                favorite: false
+            })
+            renderProducts()
+            input.value = ""
+            input2.value = ""
+    }    
     })
 
     function renderProducts() {
         container.innerHTML = ""
-        products.forEach((product, index) => {
+        if (products.length === 0) {
+            container.innerHTML = `
+            <h2>Henüz ürün yok</h2>
+            `
+            return
+        }
+        const filteredProducts = products.filter(function(product) {
+            return product.name
+                .toLowerCase()
+                .includes(searchInput.value.toLowerCase())
+        })
+        filteredProducts.forEach(function(product, index) {
             container.innerHTML += `
             <div>
-                <h2>${product}</h2>
+                <h2>${product.name}</h2>
+                <p>${product.price} TL</p>
+                <p>Favori: ${product.favorite ? "Evet" : "Hayır"}
+                <button onclick="toggleFavorite(${index})">Favori Değiştir</button>
                 <button onclick="deleteProduct(${index})">Sil</button>
+                <button onclick="editProduct(${index})">Düzenle</button>
             </div>
             `
         })
+    }
+
+    function toggleFavorite(index) {
+        products[index].favorite = !products[index].favorite
+        renderProducts()
+    }
+
+    function editProduct(index) {
+        const newName = prompt("Yeni isim")
+        const newPrice = prompt("Yeni fiyat")
+        if (newName && newPrice !== "") {
+            products[index].name = newName
+            products[index].price = newPrice
+            renderProducts()
+        }
     }
 
     function deleteProduct(index) {
         products.splice(index, 1)
         renderProducts()
     }
+    renderProducts()
 </script>
 
 {% endblock %}
