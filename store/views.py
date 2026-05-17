@@ -8,14 +8,23 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .serializers import ProductSerializer
 
-@api_view(["GET"])
+@api_view(["GET", "POST"])
 def product_api(request):
-    products = Product.objects.all()
+    if request.method == "GET":
+        products = Product.objects.all()
 
-    serializer = ProductSerializer(products, many = True)
+        serializer = ProductSerializer(products, many = True)
 
-    return Response(serializer.data)
+        return Response(serializer.data)
+    
+    elif request.method == "POST":
+        serializer = ProductSerializer(data = request.data)
 
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(serializer.data)
+        
 def api_test_page(request):
     return render(request, "api_test.html")
 

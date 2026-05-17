@@ -20,34 +20,12 @@
     const button = document.getElementById("add-btn")
     const sortButton = document.getElementById("sort-btn")
     const container = document.getElementById("container")
-    const products = []
-
-    sortButton.addEventListener("click", function() {
-        products.sort(function(a, b) {
-            return a.price - b.price
-        })
-        renderProducts()
-    })
-
-    searchInput.addEventListener("input", function() {
-        renderProducts()
-    })
-
-    button.addEventListener("click", () => {
-        if (input.value && input2.value !== "") {
-            products.push({
-                name: input.value,
-                price: input2.value,
-                favorite: false
-            })
-            renderProducts()
-            input.value = ""
-            input2.value = ""
-    }    
-    })
+    const products = JSON.parse(localStorage.getItem("products")) || []
 
     function renderProducts() {
         container.innerHTML = ""
+        localStorage.setItem("products", JSON.stringify(products))
+        
         if (products.length === 0) {
             container.innerHTML = `
             <h2>Henüz ürün yok</h2>
@@ -72,6 +50,33 @@
             `
         })
     }
+
+    sortButton.addEventListener("click", function() {
+        products.sort(function(a, b) {
+            return a.price - b.price
+        })
+        renderProducts()
+    })
+
+    searchInput.addEventListener("input", function() {
+        renderProducts()
+    })
+
+    button.addEventListener("click", () => {
+        if (input.value !== "" && input2.value !== "") {
+            fetch("/api/products/", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    name: input.value,
+                    price: Number(input2.value)
+                })
+    })
+        renderProducts()
+        input.value = ""
+        input2.value = ""
+    }    
+    })
 
     function toggleFavorite(index) {
         products[index].favorite = !products[index].favorite
