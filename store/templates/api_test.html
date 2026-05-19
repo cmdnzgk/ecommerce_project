@@ -14,18 +14,37 @@
 <div id="container"></div>
 
 <script>
+
     const input = document.getElementById("product-input")
     const input2 = document.getElementById("price-input")
     const searchInput = document.getElementById("search-input")
     const button = document.getElementById("add-btn")
     const sortButton = document.getElementById("sort-btn")
     const container = document.getElementById("container")
-    const products = JSON.parse(localStorage.getItem("products")) || []
+
+    let loading = false
+    let error = false
+
+    let products = []
 
     function renderProducts() {
         container.innerHTML = ""
         localStorage.setItem("products", JSON.stringify(products))
+
+        if (loading) {
+            container.innerHTML = `
+            <h2>Yükleniyor...</h2>
+            `
+            return
+        }
         
+        if (error) {
+            container.innerHTML = `
+            <h2>Bir hata oluştu</h2>
+            `
+            return
+        }
+
         if (products.length === 0) {
             container.innerHTML = `
             <h2>Henüz ürün yok</h2>
@@ -51,32 +70,28 @@
         })
     }
 
-    sortButton.addEventListener("click", function() {
-        products.sort(function(a, b) {
-            return a.price - b.price
-        })
-        renderProducts()
-    })
+    async function getProducts() {
+        try {
+            loading = true
+            error = false
+            renderProducts()
+            
+            const response = await fetch("/api/products/")
+            const data = await response.json()
 
-    searchInput.addEventListener("input", function() {
-        renderProducts()
-    })
+            products = data
+        }
 
-    button.addEventListener("click", () => {
-        if (input.value !== "" && input2.value !== "") {
-            fetch("/api/products/", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({
-                    name: input.value,
-                    price: Number(input2.value)
-                })
-    })
-        renderProducts()
-        input.value = ""
-        input2.value = ""
-    }    
-    })
+        catch(error) {
+            error = true
+            console.log(error)
+        }
+
+        finally {
+            loading = false
+            renderProducts()
+        }
+    }
 
     function toggleFavorite(index) {
         products[index].favorite = !products[index].favorite
@@ -97,7 +112,36 @@
         products.splice(index, 1)
         renderProducts()
     }
-    renderProducts()
+
+    sortButton.addEventListener("click", function() {
+        products.sort(function(a, b) {
+            return a.price - b.price
+        })
+        renderProducts()
+    })
+
+    searchInput.addEventListener("input", function() {
+        renderProducts()
+    })
+
+    button.addEventListener("click", async function() {
+        if (input.value !== "" && input2.value !== "") {
+            await fetch("/api/products/", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    name: input.value,
+                    price: Number(input2.value)
+                })
+    })
+        getProducts()
+        input.value = ""
+        input2.value = ""
+    }    
+    })
+
+    getProducts()
+
 </script>
 
 {% endblock %}
