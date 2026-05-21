@@ -13,5 +13,7 @@ urlpatterns = [
     path("login/", views.user_login, name="login"),
     path("logout/", views.user_logout, name="logout"),
     path("api/products/", views.product_api, name="product_api"),
+    path("api/products/<int:id>/", views.delete_product_api),
+    path("api/products/<int:id>/update/", views.update_product_api),
     path("api-test/", views.api_test_page, name="api_test"),
 ]

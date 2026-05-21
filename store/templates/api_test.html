@@ -63,8 +63,8 @@
                 <p>${product.price} TL</p>
                 <p>Favori: ${product.favorite ? "Evet" : "Hayır"}
                 <button onclick="toggleFavorite(${index})">Favori Değiştir</button>
-                <button onclick="deleteProduct(${index})">Sil</button>
-                <button onclick="editProduct(${index})">Düzenle</button>
+                <button onclick="deleteProduct(${product.id})">Sil</button>
+                <button onclick="editProduct(${product.id})">Düzenle</button>
             </div>
             `
         })
@@ -98,19 +98,27 @@
         renderProducts()
     }
 
-    function editProduct(index) {
-        const newName = prompt("Yeni isim")
+    async function editProduct(id) {
+        const newName = prompt("Yeni ürün")
         const newPrice = prompt("Yeni fiyat")
-        if (newName && newPrice !== "") {
-            products[index].name = newName
-            products[index].price = newPrice
-            renderProducts()
+        if (newName !== "" && newPrice !== "") {
+            await fetch(`/api/products/${id}/update/`, {
+                method: "PUT",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    name: newName,
+                    price: Number(newPrice),
+                })
+            })
+            getProducts()
         }
     }
 
-    function deleteProduct(index) {
-        products.splice(index, 1)
-        renderProducts()
+    async function deleteProduct(id) {
+        await fetch(`/api/products/${id}/`, {
+            method: "DELETE"
+        })
+        getProducts()
     }
 
     sortButton.addEventListener("click", function() {
@@ -126,18 +134,20 @@
 
     button.addEventListener("click", async function() {
         if (input.value !== "" && input2.value !== "") {
-            await fetch("/api/products/", {
+            const response = await fetch("/api/products/", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({
                     name: input.value,
-                    price: Number(input2.value)
+                    price: Number(input2.value),
+                    description: "Test açıklama"
                 })
-    })
-        getProducts()
-        input.value = ""
-        input2.value = ""
-    }    
+            })
+            console.log(response.status)
+            getProducts()
+            input.value = ""
+            input2.value = ""
+        }
     })
 
     getProducts()

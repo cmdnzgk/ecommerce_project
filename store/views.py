@@ -6,6 +6,7 @@ from .forms import RegisterForm
 from django.contrib import messages
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from rest_framework import status
 from .serializers import ProductSerializer
 
 @api_view(["GET", "POST"])
@@ -18,12 +19,33 @@ def product_api(request):
         return Response(serializer.data)
     
     elif request.method == "POST":
+        print(request.data)
         serializer = ProductSerializer(data = request.data)
 
         if serializer.is_valid():
             serializer.save()
 
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+      
+@api_view(["DELETE"])
+def delete_product_api(request, id):
+    product = Product.objects.get(id = id)
+    product.delete()
+
+    return Response({"message": "Silindi"})
+
+@api_view(["PUT"])
+def update_product_api(request, id):
+    product = Product.objects.get(id = id)
+
+    serializer = ProductSerializer(product, data = request.data, partial = True)
+
+    if serializer.is_valid():
+        serializer.save()
+
+        return Response(serializer.data)
+    return Response(serializer.errors)
         
 def api_test_page(request):
     return render(request, "api_test.html")
