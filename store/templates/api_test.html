@@ -11,6 +11,8 @@
 
 <button id="sort-btn">Fiyata Göre Sırala</button>
 
+<div id="message"></div>
+
 <div id="container"></div>
 
 <script>
@@ -21,32 +23,36 @@
     const button = document.getElementById("add-btn")
     const sortButton = document.getElementById("sort-btn")
     const container = document.getElementById("container")
+    const message = document.getElementById("message")
 
     let loading = false
-    let error = false
+    let adding = false
+    let error = ""
+    let success = ""
 
     let products = []
 
     function renderProducts() {
+        message.innerHTML = ""
         container.innerHTML = ""
         localStorage.setItem("products", JSON.stringify(products))
 
         if (loading) {
-            container.innerHTML = `
+            message.innerHTML = `
             <h2>Yükleniyor...</h2>
             `
             return
         }
         
         if (error) {
-            container.innerHTML = `
+            message.innerHTML = `
             <h2>Bir hata oluştu</h2>
             `
             return
         }
 
         if (products.length === 0) {
-            container.innerHTML = `
+            message.innerHTML = `
             <h2>Henüz ürün yok</h2>
             `
             return
@@ -73,7 +79,7 @@
     async function getProducts() {
         try {
             loading = true
-            error = false
+            error = ""
             renderProducts()
             
             const response = await fetch("/api/products/")
@@ -82,9 +88,10 @@
             products = data
         }
 
-        catch(error) {
-            error = true
-            console.log(error)
+        catch(err) {
+            console.log(err)
+            error = "Bir hata oluştu"
+            renderError()
         }
 
         finally {
@@ -121,6 +128,34 @@
         getProducts()
     }
 
+    function renderButton() {
+        if (adding) {
+            button.innerText = "Ekleniyor..."
+            button.disabled = true
+        }
+
+        else {
+            button.innerText = "Ekle"
+            button.disabled = false
+        }
+    }
+
+    function renderError() {
+        if (error !== "") {
+            message.innerHTML = `
+            <h2>${error}</h2>
+            `
+        }
+    }
+
+    function renderSuccess() {
+        if (success !== "") {
+            message.innerHTML = `
+            <h2>${success}</h2>
+            `
+        }
+    }
+
     sortButton.addEventListener("click", function() {
         products.sort(function(a, b) {
             return a.price - b.price
@@ -134,19 +169,56 @@
 
     button.addEventListener("click", async function() {
         if (input.value !== "" && input2.value !== "") {
-            const response = await fetch("/api/products/", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({
-                    name: input.value,
-                    price: Number(input2.value),
-                    description: "Test açıklama"
+            try {
+                error = ""
+                success = ""
+                renderError()
+                renderSuccess()
+                
+                adding = true
+                renderButton()
+
+                const response = await fetch("/api/products/", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        name: input.value,
+                        price: Number(input2.value),
+                        description: "Test açıklama"
+                    })
                 })
-            })
-            console.log(response.status)
-            getProducts()
-            input.value = ""
-            input2.value = ""
+                console.log(response.status)
+                if (response.ok) {
+                    success = "Ürün eklendi"
+                    renderSuccess()
+                    setTimeout(function() {
+                        success = ""
+                        renderSuccess()
+                        getProducts()
+                    }, 2000)
+                }
+
+                else {
+                    const data = await response.json()
+                    console.log(data)
+                    error = JSON.stringify(data)
+                    renderError()
+                }
+
+                input.value = ""
+                input2.value = ""
+            }
+
+            catch(err) {
+                console.log(err)
+                error = "Bir hata oluştu"
+                renderError()
+            }
+            
+            finally {
+                adding = false
+                renderButton()
+            }
         }
     })
 
