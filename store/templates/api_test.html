@@ -27,6 +27,7 @@
 
     let loading = false
     let adding = false
+    let deleting = false
     let error = ""
     let success = ""
 
@@ -109,10 +110,50 @@
     }
 
     async function deleteProduct(id) {
-        await fetch(`/api/products/${id}/`, {
-            method: "DELETE"
-        })
-        getProducts()
+        if (deleting) {
+            return
+        }
+
+        const confirmed = confirm("Ürünü silmek istiyor musun?")
+        if (!confirmed) {
+            return
+        }
+
+        try {
+            error = ""
+            success = ""
+            renderMessage()
+
+            deleting = true
+
+            const response = await fetch(`/api/products/${id}/`, {
+                method: "DELETE"
+            })
+
+            console.log(response.status)
+            if (response.ok) {
+                success = "Ürün silindi"
+                renderMessage()
+                setTimeout(function() {
+                    success = ""
+                    renderMessage()
+                    getProducts()
+                }, 2000)
+            }
+
+            else {
+                error = "Ürün silinemedi"
+                renderMessage()
+            }
+        }
+
+        catch(err) {
+            console.log(err)
+        }
+
+        finally {
+            deleting = false
+        }
     }
 
     function renderButton() {
@@ -203,6 +244,7 @@
                     description: "Test açıklama"
                 })
             })
+
             console.log(response.status)
             if (response.ok) {
                 success = "Ürün eklendi"
