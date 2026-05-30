@@ -28,6 +28,7 @@
     let loading = false
     let adding = false
     let deleting = false
+    let updating = false
     let error = ""
     let success = ""
 
@@ -78,8 +79,7 @@
 
         catch(err) {
             console.log(err)
-            error = "Bir hata oluştu"
-            renderMessage()
+            showError("Bir hata oluştu")
         }
 
         finally {
@@ -94,18 +94,59 @@
     }
 
     async function editProduct(id) {
-        const newName = prompt("Yeni ürün")
-        const newPrice = prompt("Yeni fiyat")
-        if (newName !== "" && newPrice !== "") {
-            await fetch(`/api/products/${id}/update/`, {
+        if (updating) {
+            return
+        }
+
+        const confirmed = confirm("Ürünü güncellemek istiyor musun?")
+        if (!confirmed) {
+            return
+        }
+
+        try {
+            error = ""
+            success = ""
+            renderMessage()
+
+            updating = true
+
+            const newName = prompt("Yeni ürün")
+            const newPrice = prompt("Yeni fiyat")
+            const price = Number(newPrice)
+
+            if (!isValidProduct(newName, price)) {
+                return
+            }
+
+            const response = await fetch(`/api/products/${id}/update/`, {
                 method: "PUT",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({
                     name: newName,
-                    price: Number(newPrice),
+                    price: price
                 })
             })
-            getProducts()
+
+            console.log(response.status)
+            if (response.ok) {
+                showSuccess("Ürün güncellendi")
+                getProducts()
+            }
+
+            else {
+                const data = await response.json()
+                console.log(data)
+                showError(parseBackendError(data))
+            }
+        }
+
+        catch(err) {
+            console.log(err)
+            showError("Bir hata oluştu")
+        }
+
+        finally {
+            updating = false
         }
     }
 
@@ -132,23 +173,18 @@
 
             console.log(response.status)
             if (response.ok) {
-                success = "Ürün silindi"
-                renderMessage()
-                setTimeout(function() {
-                    success = ""
-                    renderMessage()
-                    getProducts()
-                }, 2000)
+                showSuccess("Ürün silindi")
+                getProducts()
             }
 
             else {
-                error = "Ürün silinemedi"
-                renderMessage()
+                showError("Ürün silinemedi")
             }
         }
 
         catch(err) {
             console.log(err)
+            showError("Bir hata oluştu")
         }
 
         finally {
@@ -192,6 +228,56 @@
         }
     }
 
+    function showError(messageText) {
+        error = messageText
+        renderMessage()
+
+        setTimeout(function() {
+            error = ""
+            renderMessage()
+        }, 2000)
+    }
+
+    function showSuccess(messageText) {
+        success = messageText
+        renderMessage()
+        
+        setTimeout(function() {
+            success = ""
+            renderMessage()
+        }, 2000)
+    }
+
+    function isValidProduct(name, price) {
+        if (!name) {
+            showError("input1 hata")
+            return false
+        }
+
+        if (!price) {
+            showError("input2 hata")
+            return false
+        }
+
+        if (isNaN(Number(price))) {
+            showError("sayı olmalı")
+            return false
+        }
+
+        return true
+    }
+
+    function parseBackendError(data) {
+        const firstKey = Object.keys(data)[0]
+        const value = data[firstKey]
+
+        if (Array.isArray(value)) {
+            return value[0]
+        }
+
+        return value
+    }
+
     function renderApp() {
         renderMessage()
         renderProducts()
@@ -215,15 +301,7 @@
 
         const price = Number(input2.value)
 
-        if (input.value === "") {
-            return
-        }
-
-        if (input2.value === "") {
-            return
-        }
-
-        if (isNaN(price)) {
+        if (!isValidProduct(input.value, input2.value)) {
             return
         }
 
@@ -247,20 +325,14 @@
 
             console.log(response.status)
             if (response.ok) {
-                success = "Ürün eklendi"
-                renderMessage()
-                setTimeout(function() {
-                    success = ""
-                    renderMessage()
-                    getProducts()
-                }, 2000)
+                showSuccess("Ürün eklendi")
+                getProducts()
             }
 
             else {
                 const data = await response.json()
                 console.log(data)
-                error = JSON.stringify(data)
-                renderMessage()
+                showError(parseBackendError(data))
             }
 
             input.value = ""
@@ -269,8 +341,7 @@
 
         catch(err) {
             console.log(err)
-            error = "Bir hata oluştu"
-            renderMessage()
+            showError("Bir hata oluştu")
         }
         
         finally {
