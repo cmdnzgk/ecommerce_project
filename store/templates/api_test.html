@@ -51,17 +51,21 @@
         })
         
         filteredProducts.forEach(function(product, index) {
-            container.innerHTML += `
-            <div>
-                <h2>${product.name}</h2>
-                <p>${product.price} TL</p>
-                <p>Favori: ${product.favorite ? "Evet" : "Hayır"}
-                <button onclick="toggleFavorite(${index})">Favori Değiştir</button>
-                <button onclick="deleteProduct(${product.id})">Sil</button>
-                <button onclick="editProduct(${product.id})">Düzenle</button>
-            </div>
-            `
+            container.innerHTML += renderProductsCard(product, index)
         })
+    }
+
+    function renderProductsCard(product, index) {
+        return `
+        <div>
+            <h2>${product.name}</h2>
+            <p>${product.price} TL</p>
+            <p>Favori: ${product.favorite ? "Evet" : "Hayır"}
+            <button onclick="toggleFavorite(${index})">Favori Değiştir</button>
+            <button onclick="deleteProduct(${product.id})">Sil</button>
+            <button onclick="editProduct(${product.id})">Düzenle</button>
+        </div>
+        `
     }
 
     async function getProducts() {
@@ -130,7 +134,17 @@
             console.log(response.status)
             if (response.ok) {
                 showSuccess("Ürün güncellendi")
-                getProducts()
+                products = products.map(function(product) {
+                    if (product.id === id) {
+                        return {
+                            ...product,
+                            name: newName,
+                            price: price
+                        }
+                    }
+                    return product
+                })
+                renderProducts()
             }
 
             else {
@@ -174,7 +188,10 @@
             console.log(response.status)
             if (response.ok) {
                 showSuccess("Ürün silindi")
-                getProducts()
+                products = products.filter(function(product) {
+                    return product.id !== id
+                })
+                renderProducts()
             }
 
             else {
@@ -324,13 +341,15 @@
             })
 
             console.log(response.status)
+            const data = await response.json()
+
             if (response.ok) {
                 showSuccess("Ürün eklendi")
-                getProducts()
+                products.push(data)
+                renderProducts()
             }
 
             else {
-                const data = await response.json()
                 console.log(data)
                 showError(parseBackendError(data))
             }
