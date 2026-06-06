@@ -5,10 +5,10 @@
 <input type="text" id="product-input">
 <input type="text" id="price-input">
 
-<input type="text" id="search-input">
+<input type="text" id="search-input" placeholder="Ürün Ara">
 
 <button id="add-btn">Ekle</button>
-
+<button id="cancel-btn">İptal</button>
 <button id="sort-btn">Fiyata Göre Sırala</button>
 
 <div id="message"></div>
@@ -21,6 +21,8 @@
     const input2 = document.getElementById("price-input")
     const searchInput = document.getElementById("search-input")
     const button = document.getElementById("add-btn")
+    const cancelButton = document.getElementById("cancel-btn")
+    cancelButton.style.display = "none"
     const sortButton = document.getElementById("sort-btn")
     const container = document.getElementById("container")
     const message = document.getElementById("message")
@@ -29,6 +31,8 @@
     let adding = false
     let deleting = false
     let updating = false
+    let ascending = true
+    let editingProductId = null
     let error = ""
     let success = ""
 
@@ -63,7 +67,7 @@
             <p>Favori: ${product.favorite ? "Evet" : "Hayır"}
             <button onclick="toggleFavorite(${index})">Favori Değiştir</button>
             <button onclick="deleteProduct(${product.id})">Sil</button>
-            <button onclick="editProduct(${product.id})">Düzenle</button>
+            <button onclick="startEdit(${product.id})">Düzenle</button>
         </div>
         `
     }
@@ -92,9 +96,82 @@
         }
     }
 
+    async function createProduct() {
+        if (adding) {
+            return
+        }
+
+        const price = Number(input2.value)
+
+        if (!isValidProduct(input.value, input2.value)) {
+            return
+        }
+
+        try {
+            error = ""
+            success = ""
+            renderMessage()
+            
+            adding = true
+            renderButton()
+
+            const response = await fetch("/api/products/", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    name: input.value,
+                    price: price,
+                    description: "Test açıklama"
+                })
+            })
+
+            console.log(response.status)
+            const data = await response.json()
+
+            if (response.ok) {
+                showSuccess("Ürün eklendi")
+                products.push(data)
+                renderProducts()
+            }
+
+            else {
+                console.log(data)
+                showError(parseBackendError(data))
+            }
+            resetForm()
+        }
+
+        catch(err) {
+            console.log(err)
+            showError("Bir hata oluştu")
+        }
+        
+        finally {
+            adding = false
+            renderButton()
+        }
+    }
+
     function toggleFavorite(index) {
         products[index].favorite = !products[index].favorite
         renderProducts()
+    }
+
+    function startEdit(id) {
+        const product = products.find(function(product) {
+            return product.id === id
+        })
+
+        editingProductId = id
+        input.value = product.name
+        input2.value = product.price
+        renderButton()
+        cancelButton.style.display = "block"
+    }
+
+    function resetForm() {
+        input.value = ""
+        input2.value = ""
     }
 
     async function editProduct(id) {
@@ -114,9 +191,8 @@
 
             updating = true
 
-            const newName = prompt("Yeni ürün")
-            const newPrice = prompt("Yeni fiyat")
-            const price = Number(newPrice)
+            const newName = input.value
+            const price = Number(input2.value)
 
             if (!isValidProduct(newName, price)) {
                 return
@@ -132,6 +208,7 @@
             })
 
             console.log(response.status)
+
             if (response.ok) {
                 showSuccess("Ürün güncellendi")
                 products = products.map(function(product) {
@@ -145,6 +222,10 @@
                     return product
                 })
                 renderProducts()
+                editingProductId = null
+                renderButton()
+                resetForm()
+                cancelButton.style.display = "none"
             }
 
             else {
@@ -213,6 +294,11 @@
         if (adding) {
             button.innerText = "Ekleniyor..."
             button.disabled = true
+        }
+
+        else if (editingProductId) {
+            button.innerText = "Güncelle"
+            button.disabled = false
         }
 
         else {
@@ -301,9 +387,19 @@
     }
 
     sortButton.addEventListener("click", function() {
-        products.sort(function(a, b) {
-            return a.price - b.price
-        })
+        if (ascending) {
+            products.sort(function(a, b) {
+                return a.price - b.price
+            })
+        }
+
+        else {
+            products.sort(function(a, b) {
+                return b.price - a.price
+            })
+        }
+
+        ascending = !ascending
         renderProducts()
     })
 
@@ -311,61 +407,20 @@
         renderProducts()
     })
 
-    button.addEventListener("click", async function() {
-        if (adding) {
-            return
+    cancelButton.addEventListener("click", function() {
+        editingProductId = null
+        renderButton()
+        resetForm()
+        cancelButton.style.display = "none"
+    })
+
+    button.addEventListener("click", function() {
+        if (editingProductId) {
+            editProduct(editingProductId)
         }
 
-        const price = Number(input2.value)
-
-        if (!isValidProduct(input.value, input2.value)) {
-            return
-        }
-
-        try {
-            error = ""
-            success = ""
-            renderMessage()
-            
-            adding = true
-            renderButton()
-
-            const response = await fetch("/api/products/", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({
-                    name: input.value,
-                    price: price,
-                    description: "Test açıklama"
-                })
-            })
-
-            console.log(response.status)
-            const data = await response.json()
-
-            if (response.ok) {
-                showSuccess("Ürün eklendi")
-                products.push(data)
-                renderProducts()
-            }
-
-            else {
-                console.log(data)
-                showError(parseBackendError(data))
-            }
-
-            input.value = ""
-            input2.value = ""
-        }
-
-        catch(err) {
-            console.log(err)
-            showError("Bir hata oluştu")
-        }
-        
-        finally {
-            adding = false
-            renderButton()
+        else {
+            createProduct()
         }
     })
 
