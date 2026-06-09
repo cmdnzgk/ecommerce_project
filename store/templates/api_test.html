@@ -130,7 +130,7 @@
 
             if (response.ok) {
                 showSuccess("Ürün eklendi")
-                products.push(data)
+                products = [...products, data]
                 renderProducts()
             }
 
@@ -180,6 +180,7 @@
         }
 
         const confirmed = confirm("Ürünü güncellemek istiyor musun?")
+        
         if (!confirmed) {
             return
         }
@@ -190,6 +191,7 @@
             renderMessage()
 
             updating = true
+            renderButton()
 
             const newName = input.value
             const price = Number(input2.value)
@@ -242,6 +244,7 @@
 
         finally {
             updating = false
+            renderButton()
         }
     }
 
@@ -296,6 +299,11 @@
             button.disabled = true
         }
 
+        else if (updating) {
+            button.innerText = "Güncelleniyor..."
+            button.disabled = true
+        }
+
         else if (editingProductId) {
             button.innerText = "Güncelle"
             button.disabled = false
@@ -332,6 +340,7 @@
     }
 
     function showError(messageText) {
+        success = ""
         error = messageText
         renderMessage()
 
@@ -342,6 +351,7 @@
     }
 
     function showSuccess(messageText) {
+        error = ""
         success = messageText
         renderMessage()
         
